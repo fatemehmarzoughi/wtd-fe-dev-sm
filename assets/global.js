@@ -482,6 +482,34 @@ class HeaderDrawer extends MenuDrawer {
 
 customElements.define('header-drawer', HeaderDrawer);
 
+class PopupBox extends HTMLElement {
+
+  constructor() {
+    super();
+    document.getElementById("popup-handler").addEventListener('click', PopupBox.onPopup);
+    document.getElementById("background-overlay").addEventListener('click', PopupBox.onClose);
+    document.getElementById("popup-close").addEventListener('click', PopupBox.onClose);
+  }
+
+  static onPopup () {
+    const isOpen = !document.getElementById("popup-body").style.display === 'none'
+
+    isOpen ? PopupBox.onClose() : PopupBox.onOpen();
+  }
+
+  static onClose() {
+    document.getElementById("popup-body").style.display = 'none';
+    document.getElementById("background-overlay").style.display = 'none';
+  }
+
+  static onOpen() {
+    document.getElementById("popup-body").style.display = 'flex';
+    document.getElementById("background-overlay").style.display = 'block';
+  }
+}
+
+customElements.define('popup-box', PopupBox);
+
 class ModalDialog extends HTMLElement {
   constructor() {
     super();
