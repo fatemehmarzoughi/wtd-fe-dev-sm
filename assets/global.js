@@ -492,7 +492,7 @@ class PopupBox extends HTMLElement {
   }
 
   static onPopup () {
-    const isOpen = document.getElementById("popup-body").style.display === '' || document.getElementById("popup-body").style.display !== 'none'
+    const isOpen = !document.getElementById("popup-body").style.display === 'none'
 
     isOpen ? PopupBox.onClose() : PopupBox.onOpen();
   }
