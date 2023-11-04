@@ -1,0 +1,147 @@
+
+{{ 'component-products-filtering.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+    if results.url
+      assign results_url = results.url
+    else
+      assign terms = results.terms | escape
+    endif
+%}
+
+<div>
+  {% comment %} /* --------------------- Popupbox for filtering content --------------------- */ {% endcomment %}
+  <popup-box id="filter-form__popup" class="filter-form__popup">
+    {% comment %} /* --------------------------------- Header --------------------------------- */ {% endcomment %}
+    <span id="popup-handler" class="filter-form__filter-btn">
+      {% render 'icon-filter' %}
+      <span class="mobile-facets__open-label button-label">
+        {{ 'products.facets.filter_button' | t }}
+      </span>
+    </span>
+
+    {% comment %} /* ------------------------- Dark Background Overlay ------------------------ */ {% endcomment %}
+    <div class="filter-form__background-overlay" id="background-overlay"></div>
+
+    {% comment %} /* ------------------------------ Main Content ------------------------------ */ {% endcomment %}
+    <div id="popup-body" class="filter-form__content">
+      <span tabindex="0" id="popup-close" class="filter-form__close-popup-btn">{%- render 'icon-close' -%}</span>
+      <filter-collection-form>
+        {% if enable_filtering %}
+          <form class="filter-form__form" id="filters-form">
+          {% for filter in results.filters %}
+            <section class="filter-form__section">
+              {% if filter.type == 'list' %}
+                <label>{{ filter.label }}</label>
+                <select name={{ filter.param_name }} class="filter-form__select select__select caption-large" id="filter-category">
+                  {% for v in filter.values %}
+                    <option 
+                      value={{ v.value }}>
+                      {{ v.label }}
+                    </option>  
+                  {% endfor %}
+                </select>
+              {% endif %}
+            </section>
+    
+            {% if filter.type == 'price_range' %}
+              <section class="filter-form__section">
+                <label>{{ filter.label }}</label>
+                <div class="filter-form__inputs">
+                  <div class="field">
+                    <input 
+                      name={{ filter.min_value.param_name }} 
+                      type="number" 
+                      {%- if uses_comma_decimals -%}
+                        placeholder="{{ filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.' }}"
+                      {%- else -%}
+                        placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                      {% endif %}
+                      min="0"
+                      inputmode="decimal"
+                      class="field__input"
+                      id="price-range-min"
+                    />
+                    <label class="field__label" for="Mobile-Filter-{{ filter.label | escape }}-GTE">
+                      {{- 'products.facets.from' | t -}}
+                    </label>
+                  </div>
+                  <div class="field">
+                    <input 
+                      name={{ filter.max_value.param_name }} 
+                      type="number" 
+                      min="0"
+                      inputmode="decimal"
+                      class="field__input"
+                      placeholder="To" 
+                      id="price-range-max"
+                    >
+                    <label class="field__label" for="Mobile-Filter-{{ filter.label | escape }}-GTE">
+                      {{- 'products.facets.to' | t -}}
+                    </label>
+                  </div>
+                </div>
+              </section>
+            {% endif %}
+          {% endfor %}
+          <button class="no-js-hidden button button--primary filter-form__on-submit" id="on-submit">
+            {{ 'products.facets.apply' | t }}
+          </button>
+          </form>
+        {% endif %}
+      </filter-collection-form>
+    </div>
+  </popup-box>
+
+  {% comment %} /* ------------------------------- Button tags ------------------------------ */ {% endcomment %}
+  {% if filter_type == 'drawer' %}
+    <facet-filters-form class="facets facets-pill">
+      <form id="FacetFiltersPillsForm" class="facets__form">
+        <div class="active-facets active-facets-desktop">
+          {% for filter in results.filters %}
+            {% for value in filter.active_values %}
+              <facet-remove>
+                <a href="{{ value.url_to_remove }}" class="active-facets__button active-facets__button--light">
+                  <span class="active-facets__button-inner button button--tertiary">
+                    {{ filter.label }}: {{ value.label | escape }}
+                    {% render 'icon-close-small' %}
+                    <span class="visually-hidden">{{ 'products.facets.clear_filter' | t }}</span>
+                  </span>
+                </a>
+              </facet-remove>
+            {% endfor %}
+
+            {% if filter.type == 'price_range' %}
+              {% if filter.min_value.value != null or filter.max_value.value != null %}
+                <facet-remove>
+                  <a href="{{ filter.url_to_remove }}" class="active-facets__button active-facets__button--light">
+                    <span class="active-facets__button-inner button button--tertiary">
+                      {% if filter.min_value.value %}
+                        {{ filter.min_value.value | money }}
+                      {% else %}
+                        {{ 0 | money }}
+                      {% endif %}
+                      -
+                      {% if filter.max_value.value %}
+                        {{ filter.max_value.value | money }}
+                      {% else %}
+                        {{ filter.range_max | money }}
+                      {% endif %}
+                      {% render 'icon-close-small' %}
+                      <span class="visually-hidden">{{ 'products.facets.clear_filter' | t }}</span>
+                    </span>
+                  </a>
+                </facet-remove>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          <facet-remove class="active-facets__button-wrapper">
+            <a href="{{ results_url }}" class="active-facets__button-remove underlined-link">
+              <span>{{ 'products.facets.clear_all' | t }}</span>
+            </a>
+          </facet-remove>
+        </div>
+      </form>
+    </facet-filters-form>
+  {% endif %}
+</div>
